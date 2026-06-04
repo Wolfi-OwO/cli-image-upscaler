@@ -32,7 +32,7 @@ ARG INSTALL_AI=true
 # OCI image metadata (overridden by CI with real values).
 LABEL org.opencontainers.image.title="image-upscaler" \
       org.opencontainers.image.description="Free AI-powered CLI to upscale images up to 16x." \
-      org.opencontainers.image.source="https://github.com/koflerphillip/cli-image-upscaler" \
+      org.opencontainers.image.source="https://github.com/Wolfi-OwO/cli-image-upscaler" \
       org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONUNBUFFERED=1 \

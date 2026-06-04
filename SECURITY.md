@@ -13,7 +13,7 @@ The latest released minor version receives security updates.
 Please **do not** open a public issue for security vulnerabilities.
 
 Instead, report privately via GitHub's
-[private vulnerability reporting](https://github.com/koflerphillip/cli-image-upscaler/security/advisories/new),
+[private vulnerability reporting](https://github.com/Wolfi-OwO/cli-image-upscaler/security/advisories/new),
 or email **koflerphillip@gmail.com** with:
 
 - a description of the issue and its impact,

@@ -4,9 +4,9 @@
 
 **Free, AI-powered command-line image upscaling — up to 16× larger and sharper.**
 
-[![CI](https://github.com/koflerphillip/cli-image-upscaler/actions/workflows/ci.yml/badge.svg)](https://github.com/koflerphillip/cli-image-upscaler/actions/workflows/ci.yml)
-[![Security](https://github.com/koflerphillip/cli-image-upscaler/actions/workflows/security.yml/badge.svg)](https://github.com/koflerphillip/cli-image-upscaler/actions/workflows/security.yml)
-[![Docker](https://github.com/koflerphillip/cli-image-upscaler/actions/workflows/docker.yml/badge.svg)](https://github.com/koflerphillip/cli-image-upscaler/actions/workflows/docker.yml)
+[![CI](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/ci.yml)
+[![Security](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/security.yml/badge.svg)](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/security.yml)
+[![Docker](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/docker.yml/badge.svg)](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/docker.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 
@@ -63,7 +63,7 @@ upscale run photo.jpg -s 4 -b lanczos
 | ----------- | ------------------------------------------------------ | --------------------------------------------- |
 | PyPI (full) | `pip install "image-upscaler[ai]"`                     | Real-ESRGAN + Lanczos                         |
 | PyPI (lite) | `pip install image-upscaler`                           | Lanczos only                                  |
-| Docker      | `docker pull ghcr.io/koflerphillip/cli-image-upscaler` | Real-ESRGAN + Lanczos (`INSTALL_AI=false` → lean) |
+| Docker      | `docker pull ghcr.io/wolfi-owo/cli-image-upscaler` | Real-ESRGAN + Lanczos (`INSTALL_AI=false` → lean) |
 | From source | `git clone … && pip install -e ".[ai]"`                | Real-ESRGAN + Lanczos                         |
 
 See [docs/installation.md](docs/installation.md) for GPU setup and troubleshooting.
@@ -135,7 +135,7 @@ single naïve resize. Read more in [docs/how-it-works.md](docs/how-it-works.md).
 ## Development
 
 ```bash
-git clone https://github.com/koflerphillip/cli-image-upscaler
+git clone https://github.com/Wolfi-OwO/cli-image-upscaler
 cd cli-image-upscaler
 make install        # editable install with dev tools
 make check          # lint + type-check + tests

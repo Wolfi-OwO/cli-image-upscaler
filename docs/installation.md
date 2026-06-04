@@ -30,7 +30,7 @@ upscale models      # shows whether the AI backend is active
 ## From source
 
 ```bash
-git clone https://github.com/koflerphillip/cli-image-upscaler
+git clone https://github.com/Wolfi-OwO/cli-image-upscaler
 cd cli-image-upscaler
 pip install -e ".[ai]"     # or ".[dev,ai]" for development
 ```
@@ -39,13 +39,13 @@ pip install -e ".[ai]"     # or ".[dev,ai]" for development
 
 ```bash
 # Pull the published image (includes the Real-ESRGAN AI backend)
-docker pull ghcr.io/koflerphillip/cli-image-upscaler:latest
+docker pull ghcr.io/wolfi-owo/cli-image-upscaler:latest
 
 # Run — persist downloaded model weights in a named volume
 docker run --rm \
   -v "${PWD}:/work" \
   -v upscaler-weights:/home/app/.cache/image-upscaler/weights \
-  ghcr.io/koflerphillip/cli-image-upscaler:latest run photo.jpg -s 4 --tile 512
+  ghcr.io/wolfi-owo/cli-image-upscaler:latest run photo.jpg -s 4 --tile 512
 
 # Or build a lean Lanczos-only image (no PyTorch)
 docker build --build-arg INSTALL_AI=false -t image-upscaler:lite .

@@ -36,5 +36,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   push to GHCR, Trivy + CodeQL security scanning, and PyPI release.
 - Full documentation under `docs/`.
 
-[Unreleased]: https://github.com/koflerphillip/cli-image-upscaler/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/koflerphillip/cli-image-upscaler/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Wolfi-OwO/cli-image-upscaler/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Wolfi-OwO/cli-image-upscaler/releases/tag/v0.1.0

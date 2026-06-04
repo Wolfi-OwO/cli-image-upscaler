@@ -6,7 +6,7 @@ are welcome — bug reports, documentation, tests, and code.
 ## Getting set up
 
 ```bash
-git clone https://github.com/koflerphillip/cli-image-upscaler
+git clone https://github.com/Wolfi-OwO/cli-image-upscaler
 cd cli-image-upscaler
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 make install          # editable install with dev tools
@@ -55,7 +55,7 @@ required.
 
 ## Reporting bugs / requesting features
 
-Use the [issue templates](https://github.com/koflerphillip/cli-image-upscaler/issues/new/choose).
+Use the [issue templates](https://github.com/Wolfi-OwO/cli-image-upscaler/issues/new/choose).
 For security issues, **do not** open a public issue — see [SECURITY.md](SECURITY.md).
 
 By contributing you agree that your contributions are licensed under the
