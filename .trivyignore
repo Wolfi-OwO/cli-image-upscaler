@@ -1,0 +1,6 @@
+# Trivy ignore file.
+#
+# Add CVE IDs here only with a documented justification and, ideally, an expiry
+# date. Example:
+#
+# CVE-2024-XXXXX exp:2026-12-31  # not exploitable: <reason>
