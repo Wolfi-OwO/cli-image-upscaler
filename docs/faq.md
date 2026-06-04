@@ -30,15 +30,40 @@ See [How it works](how-it-works.md#honest-expectations).
 - Reduce `--scale`, or process at 4× twice instead of 16× in one go.
 - Add `--tile 256` (or smaller) to cap memory use on large images / small GPUs.
 
-### I get a `basicsr` / `functional_tensor` import error.
+### I get a `basicsr` / `functional_tensor` import error
 
 Newer `torchvision` removed `torchvision.transforms.functional_tensor`, which old
-`basicsr` releases import. Workarounds:
+`basicsr` releases import. **image-upscaler installs a built-in compatibility shim
+automatically**, so this should now "just work" with modern torchvision. If you
+still hit it (e.g. a very different torchvision layout):
 
 - Pin `torchvision<0.17`, or
-- Patch the single import in BasicSR
-  (`functional_tensor` → `functional`), or
+- Patch the single import in BasicSR (`functional_tensor` → `functional`), or
 - Use the `lanczos` backend (`-b lanczos`) if you don't need AI super-resolution.
+
+### The AI upscale only makes the image bigger, not sharper
+
+That means the **Lanczos fallback** ran, not the AI model. Lanczos is plain
+interpolation — it enlarges but never adds detail. Check the log: if you see
+`Real-ESRGAN backend unavailable; falling back to Lanczos`, the AI stack isn't
+installed/active. Fix it by:
+
+- Installing the AI extras: `pip install "image-upscaler[ai]"`, or building the
+  Docker image with `--build-arg INSTALL_AI=true`.
+- Confirming with `upscale models` (look for `Real-ESRGAN backend: available`).
+- Forcing the backend so a fallback errors loudly instead of silently:
+  `upscale run photo.jpg -s 4 -b realesrgan`.
+
+### It runs forever / runs out of memory on CPU
+
+Real-ESRGAN is compute-heavy. A 12 MP phone photo at 16× targets ~3 *billion*
+pixels, which is impractical on CPU. For CPU use:
+
+- Start with `-s 4` (4× already quadruples each dimension).
+- Add `--tile 512` (or `256`) to cap memory and show progress.
+- Use a CUDA GPU for a 10–50× speed-up (see [installation](installation.md#gpu-acceleration)).
+
+Half precision is GPU-only; on CPU the tool automatically uses fp32.
 
 ### Can I run it without installing PyTorch?
 

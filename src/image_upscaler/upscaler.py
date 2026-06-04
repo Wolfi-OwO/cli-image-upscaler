@@ -73,10 +73,42 @@ class UpscaleConfig:
             self.backend = Backend(self.backend)
 
 
+def _install_basicsr_compat() -> None:  # pragma: no cover - requires optional deps
+    """Shim for `basicsr` on modern torchvision.
+
+    ``basicsr`` imports ``torchvision.transforms.functional_tensor``, which was
+    removed in torchvision >= 0.17. Without this, importing ``realesrgan`` raises
+    ``ImportError`` and the tool silently falls back to Lanczos. We alias the old
+    module to the current ``functional`` namespace so the import succeeds.
+    """
+    import sys
+
+    if "torchvision.transforms.functional_tensor" in sys.modules:
+        return
+    try:
+        import torchvision.transforms.functional_tensor  # noqa: F401
+
+        return  # still present (older torchvision) — nothing to do
+    except ImportError:
+        pass
+    try:
+        import types
+
+        import torchvision.transforms.functional as F
+
+        shim = types.ModuleType("torchvision.transforms.functional_tensor")
+        shim.rgb_to_grayscale = F.rgb_to_grayscale  # type: ignore[attr-defined]
+        sys.modules["torchvision.transforms.functional_tensor"] = shim
+    except Exception:  # noqa: BLE001 - best-effort; import will surface real errors
+        logger.debug("Could not install basicsr/torchvision compat shim", exc_info=True)
+
+
 def realesrgan_available() -> bool:
     """Return ``True`` when the Real-ESRGAN backend can be imported."""
     try:  # pragma: no cover - depends on optional deps being installed
         import torch  # noqa: F401
+
+        _install_basicsr_compat()
         from realesrgan import RealESRGANer  # noqa: F401
 
         return True
@@ -144,8 +176,18 @@ class Upscaler:
     # -- Real-ESRGAN backend ----------------------------------------------
     def _upscale_realesrgan(self, image: Image.Image) -> Image.Image:  # pragma: no cover
         import numpy as np
+        import torch
 
         upsampler = self._upsampler
+        if not torch.cuda.is_available() and self.config.tile == 0:
+            megapixels = (image.width * image.height) / 1e6
+            if megapixels * self.config.scale**2 > 32:
+                logger.warning(
+                    "Large output on CPU without tiling can be very slow or run "
+                    "out of memory (≈%.0f MP target). Consider '--tile 512' "
+                    "and/or a smaller '--scale'.",
+                    megapixels * self.config.scale**2,
+                )
         has_alpha = image.mode in ("RGBA", "LA")
         rgb = image.convert("RGBA" if has_alpha else "RGB")
 
@@ -174,8 +216,18 @@ class Upscaler:
 
     @cached_property
     def _upsampler(self) -> Any:  # pragma: no cover - requires optional deps
+        import torch
+
+        _install_basicsr_compat()
         from basicsr.archs.rrdbnet_arch import RRDBNet
         from realesrgan import RealESRGANer
+
+        # Half precision is only supported on CUDA; forcing it on CPU raises
+        # "not implemented for Half". Auto-disable it when no GPU is present so
+        # CPU users get correct (if slower) output instead of a crash.
+        use_half = (not self.config.fp32) and torch.cuda.is_available()
+        if not torch.cuda.is_available() and not self.config.fp32:
+            logger.info("No CUDA device detected; using fp32 (CPU mode).")
 
         spec = self._spec
         model = RRDBNet(
@@ -194,7 +246,7 @@ class Upscaler:
             tile=self.config.tile,
             tile_pad=self.config.tile_pad,
             pre_pad=self.config.pre_pad,
-            half=not self.config.fp32,
+            half=use_half,
             gpu_id=self.config.gpu_id,
         )
 

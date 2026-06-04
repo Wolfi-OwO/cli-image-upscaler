@@ -42,8 +42,10 @@ dependencies = [
 [project.optional-dependencies]
 # AI super-resolution backend. Heavy (pulls in PyTorch).
 ai = [
-    "numpy>=1.24",
+    # basicsr is incompatible with NumPy 2.x (removed deprecated aliases).
+    "numpy>=1.24,<2",
     "torch>=2.1",
+    "torchvision>=0.16",
     "realesrgan>=0.3.0",
     "basicsr>=1.4.2",
     "gfpgan>=1.3.8",

@@ -55,11 +55,17 @@ RUN useradd --create-home --uid 10001 app
 
 COPY --from=builder /dist/*.whl /tmp/
 
-RUN if [ "$INSTALL_AI" = "true" ]; then \
-        pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
-        && pip install --no-cache-dir /tmp/*.whl[ai]; \
+# Resolve the wheel filename first: a glob like `/tmp/*.whl[ai]` is parsed by the
+# shell as a character class, so the extras must be appended to the real path.
+RUN WHEEL="$(ls /tmp/image_upscaler-*.whl)" \
+    && if [ "$INSTALL_AI" = "true" ]; then \
+        # Install CPU-only torch/torchvision first so the heavy CUDA wheels from
+        # PyPI are never pulled in by the AI extras.
+        pip install --no-cache-dir torch torchvision \
+            --index-url https://download.pytorch.org/whl/cpu \
+        && pip install --no-cache-dir "${WHEEL}[ai]"; \
     else \
-        pip install --no-cache-dir /tmp/*.whl; \
+        pip install --no-cache-dir "${WHEEL}"; \
     fi \
     && rm -f /tmp/*.whl
 
