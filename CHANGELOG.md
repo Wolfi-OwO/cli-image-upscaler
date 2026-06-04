@@ -17,6 +17,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Docker images now build with the Real-ESRGAN **AI backend by default**. Build
   with `--build-arg INSTALL_AI=false` for a lean Lanczos-only image.
+- `--tile` now defaults to **512** (was 0) so large images don't exhaust RAM/VRAM
+  by default. Pass `--tile 0` to disable tiling for maximum speed/quality when you
+  have the memory.
 
 ### Fixed
 

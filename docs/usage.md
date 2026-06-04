@@ -28,7 +28,7 @@ scanned for supported images (`--recursive` to descend into subfolders).
 | `-f, --format TEXT` | keep source | Output extension, e.g. `png`, `jpg`, `webp`. |
 | `-q, --quality INTEGER` | `95` | Quality for lossy formats (1–100). |
 | `--suffix TEXT` | `_upscaled_<scale>x` | Filename suffix for generated outputs. |
-| `--tile INTEGER` | `0` | Tile size for low-memory GPUs (0 = off). |
+| `--tile INTEGER` | `512` | Tile size (px) to bound memory. `0` disables tiling (fastest/seamless, but can exhaust RAM/VRAM on large images). |
 | `--face-enhance` | off | Restore faces with GFPGAN. |
 | `--fp32` | off | Full precision (required on most CPUs). |
 | `--gpu-id INTEGER` | auto | GPU device index. |

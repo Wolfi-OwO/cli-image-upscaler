@@ -121,9 +121,10 @@ def run(
         95, "--quality", "-q", min=1, max=100, help="Quality for lossy formats (1-100)."
     ),
     tile: int = typer.Option(
-        0,
+        512,
         "--tile",
-        help="Tile size for low-memory processing (0 = no tiling).",
+        help="Tile size (px) to bound memory. 0 disables tiling (fastest/seamless "
+        "but can exhaust RAM/VRAM on large images).",
     ),
     face_enhance: bool = typer.Option(
         False, "--face-enhance", help="Restore faces with GFPGAN (requires AI extras)."
