@@ -113,11 +113,12 @@ Or via Compose (the `upscaler-gpu` service defaults to `cu128`):
 docker compose run --rm upscaler-gpu run photo.jpg -s 4 --gpu-id 0
 ```
 
-Sanity-check that the container sees the GPU:
+Sanity-check that the container sees the GPU. The image's entrypoint is
+`upscale`, so override it with `--entrypoint python` to run Python directly:
 
 ```bash
-docker run --rm --gpus all image-upscaler:cuda \
-  python -c "import torch; print(torch.cuda.is_available())"   # -> True
+docker run --rm --gpus all --entrypoint python image-upscaler:cuda \
+  -c "import torch; print(torch.cuda.is_available())"   # -> True
 ```
 
 If you see `No CUDA device detected; using fp32 (CPU mode)` in the logs, the
