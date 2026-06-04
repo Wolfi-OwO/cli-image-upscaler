@@ -60,3 +60,12 @@ def test_load_and_save_jpeg_drops_alpha(tmp_path: Path) -> None:
     save_image(image, dest)
     with Image.open(dest) as result:
         assert result.mode == "RGB"
+
+
+def test_save_image_writes_dpi(tmp_path: Path) -> None:
+    dest = tmp_path / "dpi.png"
+    save_image(Image.new("RGB", (4, 4)), dest, dpi=300)
+    with Image.open(dest) as result:
+        # PNG stores DPI as integer pixels-per-metre, so 300 round-trips inexactly.
+        dpi = result.info.get("dpi")
+        assert dpi is not None and round(dpi[0]) == 300

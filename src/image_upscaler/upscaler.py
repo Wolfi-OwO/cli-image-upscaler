@@ -10,7 +10,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 from .exceptions import UnsupportedScaleError, UpscaleError
 from .models import (
@@ -60,6 +60,10 @@ class UpscaleConfig:
     fp32: bool = False
     gpu_id: int | None = None
     download: bool = True
+    # Post-processing: unsharp-mask strength (0 = off, ~1.0 subtle, ~2.0 strong).
+    sharpen: float = 0.0
+    # DPI metadata written into the output file (does not change pixels/detail).
+    dpi: int | None = None
 
     def __post_init__(self) -> None:
         if self.scale not in SUPPORTED_SCALES:
@@ -158,15 +162,27 @@ class Upscaler:
     def upscale_image(self, image: Image.Image) -> Image.Image:
         """Return an upscaled copy of ``image``."""
         if self.backend is Backend.REALESRGAN:
-            return self._upscale_realesrgan(image)
-        return self._upscale_lanczos(image)
+            result = self._upscale_realesrgan(image)
+        else:
+            result = self._upscale_lanczos(image)
+        if self.config.sharpen > 0:
+            result = self._apply_sharpen(result)
+        return result
 
     def upscale_file(self, source: Path, destination: Path, *, quality: int = 95) -> Path:
         """Upscale ``source`` and write the result to ``destination``."""
         image = load_image(source)
         result = self.upscale_image(image)
-        save_image(result, destination, quality=quality)
+        save_image(result, destination, quality=quality, dpi=self.config.dpi)
         return destination
+
+    # -- post-processing ---------------------------------------------------
+    def _apply_sharpen(self, image: Image.Image) -> Image.Image:
+        """Apply an unsharp mask to boost perceived sharpness."""
+        # Strength scales the unsharp "percent"; clamp to a sane range.
+        strength = max(0.0, min(self.config.sharpen, 5.0))
+        percent = int(strength * 100)
+        return image.filter(ImageFilter.UnsharpMask(radius=2, percent=percent, threshold=2))
 
     # -- Lanczos backend ---------------------------------------------------
     def _upscale_lanczos(self, image: Image.Image) -> Image.Image:

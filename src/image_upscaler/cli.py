@@ -129,6 +129,18 @@ def run(
     face_enhance: bool = typer.Option(
         False, "--face-enhance", help="Restore faces with GFPGAN (requires AI extras)."
     ),
+    sharpen: float = typer.Option(
+        0.0,
+        "--sharpen",
+        min=0.0,
+        max=5.0,
+        help="Unsharp-mask strength for a crisper finish (0 = off, ~1.0 subtle, ~2.0 strong).",
+    ),
+    dpi: Optional[int] = typer.Option(
+        None,
+        "--dpi",
+        help="Write DPI metadata into the output (print size only; does not add detail).",
+    ),
     fp32: bool = typer.Option(
         False, "--fp32", help="Use full fp32 precision (slower, needed on most CPUs)."
     ),
@@ -162,6 +174,8 @@ def run(
             backend=backend,
             tile=tile,
             face_enhance=face_enhance,
+            sharpen=sharpen,
+            dpi=dpi,
             fp32=fp32,
             gpu_id=gpu_id,
             download=not no_download,

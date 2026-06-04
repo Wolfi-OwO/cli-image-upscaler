@@ -54,6 +54,32 @@ def test_run_directory_to_output_dir(tmp_path: Path) -> None:
     assert produced == ["one_upscaled_4x.png", "two_upscaled_4x.png"]
 
 
+def test_run_with_sharpen_and_dpi(sample_image: Path, tmp_path: Path) -> None:
+    out = tmp_path / "result.png"
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            str(sample_image),
+            "-o",
+            str(out),
+            "-s",
+            "2",
+            "-b",
+            "lanczos",
+            "--sharpen",
+            "1.5",
+            "--dpi",
+            "300",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    with Image.open(out) as img:
+        assert img.size == (32, 24)
+        dpi = img.info.get("dpi")
+        assert dpi is not None and round(dpi[0]) == 300
+
+
 def test_run_rejects_unsupported_scale(sample_image: Path) -> None:
     result = runner.invoke(app, ["run", str(sample_image), "-s", "3", "-b", "lanczos"])
     assert result.exit_code == 2

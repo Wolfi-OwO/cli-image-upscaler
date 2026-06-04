@@ -80,8 +80,14 @@ def default_output_path(
     return target_dir / f"{source.stem}{stem_suffix}{extension}"
 
 
-def save_image(image: Image.Image, path: Path, *, quality: int = 95) -> None:
-    """Save ``image`` to ``path``, creating parent directories as needed."""
+def save_image(
+    image: Image.Image, path: Path, *, quality: int = 95, dpi: int | None = None
+) -> None:
+    """Save ``image`` to ``path``, creating parent directories as needed.
+
+    ``dpi`` writes print-resolution metadata only; it does not change the pixel
+    data or visible sharpness.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     suffix = path.suffix.lower()
     params: dict[str, Any] = {}
@@ -93,4 +99,7 @@ def save_image(image: Image.Image, path: Path, *, quality: int = 95) -> None:
         params.update(quality=quality, method=6)
     elif suffix == ".png":
         params.update(optimize=True)
+    # DPI metadata is supported by these formats; WebP/BMP ignore it.
+    if dpi and suffix in (".jpg", ".jpeg", ".png", ".tif", ".tiff"):
+        params["dpi"] = (dpi, dpi)
     image.save(path, **params)

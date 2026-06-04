@@ -8,6 +8,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `--sharpen` option: optional unsharp-mask finish for a crisper result.
+- `--dpi` option: write print-resolution metadata into the output (does not
+  change pixels or visible sharpness).
 - NVIDIA GPU support. Build the Docker image with `--build-arg TORCH_CHANNEL=cu128`
   (RTX 50-series / Blackwell) and run with `--gpus all`, or use the new
   `upscaler-gpu` Compose service. The engine already auto-detects CUDA and uses
