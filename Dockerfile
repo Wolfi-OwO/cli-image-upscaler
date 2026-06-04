@@ -2,10 +2,10 @@
 #
 # Multi-stage build for image-upscaler.
 #
-# By default this produces a lean image with the Lanczos backend.
-# Build with AI super-resolution (Real-ESRGAN, CPU PyTorch) like so:
+# By default this produces a full image with the Real-ESRGAN AI backend
+# (CPU PyTorch). For a lean Lanczos-only image (much smaller, no PyTorch):
 #
-#   docker build --build-arg INSTALL_AI=true -t image-upscaler:ai .
+#   docker build --build-arg INSTALL_AI=false -t image-upscaler:lite .
 #
 # -----------------------------------------------------------------------------
 # Stage 1 — build the wheel
@@ -27,7 +27,7 @@ RUN python -m build --wheel --outdir /dist
 # -----------------------------------------------------------------------------
 FROM python:3.11-slim AS runtime
 
-ARG INSTALL_AI=false
+ARG INSTALL_AI=true
 
 # OCI image metadata (overridden by CI with real values).
 LABEL org.opencontainers.image.title="image-upscaler" \

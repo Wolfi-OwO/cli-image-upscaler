@@ -38,12 +38,17 @@ pip install -e ".[ai]"     # or ".[dev,ai]" for development
 ## Docker
 
 ```bash
-# Lean image (Lanczos)
+# Pull the published image (includes the Real-ESRGAN AI backend)
 docker pull ghcr.io/koflerphillip/cli-image-upscaler:latest
 
-# Or build locally with the AI backend
-docker build --build-arg INSTALL_AI=true -t image-upscaler:ai .
-docker run --rm -v "${PWD}:/work" image-upscaler:ai run photo.jpg -s 4
+# Run — persist downloaded model weights in a named volume
+docker run --rm \
+  -v "${PWD}:/work" \
+  -v upscaler-weights:/home/app/.cache/image-upscaler/weights \
+  ghcr.io/koflerphillip/cli-image-upscaler:latest run photo.jpg -s 4 --tile 512
+
+# Or build a lean Lanczos-only image (no PyTorch)
+docker build --build-arg INSTALL_AI=false -t image-upscaler:lite .
 ```
 
 ## GPU acceleration

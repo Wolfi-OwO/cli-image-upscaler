@@ -9,7 +9,9 @@ services:
     build:
       context: .
       args:
-        INSTALL_AI: "${INSTALL_AI:-false}"
+        # AI (Real-ESRGAN) backend is built by default; set INSTALL_AI=false
+        # for a lean Lanczos-only image.
+        INSTALL_AI: "${INSTALL_AI:-true}"
     image: image-upscaler:${TAG:-local}
     volumes:
       - ./:/work

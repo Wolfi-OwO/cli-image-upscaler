@@ -59,32 +59,35 @@ upscale run photo.jpg -s 4 -b lanczos
 
 ## Installation
 
-| Method      | Command                                                | Backend                                                   |
-| ----------- | ------------------------------------------------------ | --------------------------------------------------------- |
-| PyPI (full) | `pip install "image-upscaler[ai]"`                     | Real-ESRGAN + Lanczos                                     |
-| PyPI (lite) | `pip install image-upscaler`                           | Lanczos only                                              |
-| Docker      | `docker pull ghcr.io/koflerphillip/cli-image-upscaler` | Lanczos (build with `--build-arg INSTALL_AI=true` for AI) |
-| From source | `git clone … && pip install -e ".[ai]"`                | Real-ESRGAN + Lanczos                                     |
+| Method      | Command                                                | Backend                                       |
+| ----------- | ------------------------------------------------------ | --------------------------------------------- |
+| PyPI (full) | `pip install "image-upscaler[ai]"`                     | Real-ESRGAN + Lanczos                         |
+| PyPI (lite) | `pip install image-upscaler`                           | Lanczos only                                  |
+| Docker      | `docker pull ghcr.io/koflerphillip/cli-image-upscaler` | Real-ESRGAN + Lanczos (`INSTALL_AI=false` → lean) |
+| From source | `git clone … && pip install -e ".[ai]"`                | Real-ESRGAN + Lanczos                         |
 
 See [docs/installation.md](docs/installation.md) for GPU setup and troubleshooting.
 
 ## Docker
 
 ```bash
-# Build a lean (Lanczos) image
+# Build the image (includes the Real-ESRGAN AI backend by default)
 docker build -t image-upscaler .
 
-# Build with the AI backend (CPU PyTorch)
-docker build --build-arg INSTALL_AI=true -t image-upscaler:ai .
+# ...or a lean Lanczos-only image (no PyTorch, much smaller)
+docker build --build-arg INSTALL_AI=false -t image-upscaler:lite .
 
-# Run — mount the current directory as /work
-docker run --rm -v "${PWD}:/work" image-upscaler run photo.jpg -s 4
+# Run — mount the current dir as /work, persist model weights in a volume
+docker run --rm \
+  -v "${PWD}:/work" \
+  -v upscaler-weights:/home/app/.cache/image-upscaler/weights \
+  image-upscaler run photo.jpg -s 4 --tile 512
 ```
 
 Or with Compose:
 
 ```bash
-INSTALL_AI=true docker compose run --rm upscaler run photo.jpg -s 8
+docker compose run --rm upscaler run photo.jpg -s 4 --tile 512
 ```
 
 ## Usage

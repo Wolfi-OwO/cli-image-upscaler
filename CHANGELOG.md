@@ -6,6 +6,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Docker images now build with the Real-ESRGAN **AI backend by default**. Build
+  with `--build-arg INSTALL_AI=false` for a lean Lanczos-only image.
+
+### Fixed
+
+- Docker `[ai]` build failure caused by the shell parsing `*.whl[ai]` as a glob.
+- Real-ESRGAN backend silently falling back to Lanczos on modern torchvision
+  (added a `functional_tensor` compatibility shim for `basicsr`).
+- Half-precision crash on CPU (`not implemented for Half`) — fp32 is now selected
+  automatically when no CUDA device is present.
+- Added `torchvision` to the `ai` extra and pinned `numpy<2` for `basicsr`.
+
 ## [0.1.0] - 2026-06-04
 
 ### Added
