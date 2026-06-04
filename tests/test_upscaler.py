@@ -64,3 +64,23 @@ def test_config_accepts_string_enums() -> None:
     cfg = UpscaleConfig(scale=4, model="anime", backend="lanczos")
     assert cfg.backend is Backend.LANCZOS
     assert cfg.model.value == "anime"
+
+
+def test_sharpen_keeps_size_and_changes_pixels() -> None:
+    src = Image.new("RGB", (8, 8), (128, 128, 128))
+    # A single bright pixel gives the unsharp mask an edge to act on.
+    src.putpixel((4, 4), (255, 255, 255))
+    plain = Upscaler(UpscaleConfig(scale=2, backend=Backend.LANCZOS)).upscale_image(src)
+    sharp = Upscaler(UpscaleConfig(scale=2, backend=Backend.LANCZOS, sharpen=2.0)).upscale_image(
+        src
+    )
+    assert sharp.size == plain.size == (16, 16)
+    assert list(sharp.getdata()) != list(plain.getdata())
+
+
+def test_sharpen_zero_is_noop() -> None:
+    src = Image.new("RGB", (8, 8), (10, 20, 30))
+    src.putpixel((2, 2), (200, 100, 50))
+    plain = Upscaler(UpscaleConfig(scale=2, backend=Backend.LANCZOS)).upscale_image(src)
+    same = Upscaler(UpscaleConfig(scale=2, backend=Backend.LANCZOS, sharpen=0.0)).upscale_image(src)
+    assert list(same.getdata()) == list(plain.getdata())

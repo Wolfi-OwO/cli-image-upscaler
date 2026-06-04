@@ -127,6 +127,8 @@ upscale run INPUT... [OPTIONS]
   -q, --quality INTEGER  Quality for lossy formats (1-100)  [default: 95]
       --tile INTEGER     Tile size in px to bound memory  [default: 512; 0 = off]
       --face-enhance     Restore faces with GFPGAN
+      --sharpen FLOAT    Unsharp-mask strength for a crisper finish (0 = off)
+      --dpi INTEGER      Write DPI metadata (print size only; adds no detail)
       --fp32             Full precision (needed on most CPUs)
       --gpu-id INTEGER   GPU device index
   -r, --recursive        Recurse into input directories
