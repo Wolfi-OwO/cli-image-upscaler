@@ -59,12 +59,12 @@ upscale run photo.jpg -s 4 -b lanczos
 
 ## Installation
 
-| Method | Command | Backend |
-| ------ | ------- | ------- |
-| PyPI (full) | `pip install "image-upscaler[ai]"` | Real-ESRGAN + Lanczos |
-| PyPI (lite) | `pip install image-upscaler` | Lanczos only |
-| Docker | `docker pull ghcr.io/koflerphillip/cli-image-upscaler` | Lanczos (build with `--build-arg INSTALL_AI=true` for AI) |
-| From source | `git clone … && pip install -e ".[ai]"` | Real-ESRGAN + Lanczos |
+| Method      | Command                                                | Backend                                                   |
+| ----------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| PyPI (full) | `pip install "image-upscaler[ai]"`                     | Real-ESRGAN + Lanczos                                     |
+| PyPI (lite) | `pip install image-upscaler`                           | Lanczos only                                              |
+| Docker      | `docker pull ghcr.io/koflerphillip/cli-image-upscaler` | Lanczos (build with `--build-arg INSTALL_AI=true` for AI) |
+| From source | `git clone … && pip install -e ".[ai]"`                | Real-ESRGAN + Lanczos                                     |
 
 See [docs/installation.md](docs/installation.md) for GPU setup and troubleshooting.
 
