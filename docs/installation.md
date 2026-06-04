@@ -51,19 +51,82 @@ docker run --rm \
 docker build --build-arg INSTALL_AI=false -t image-upscaler:lite .
 ```
 
-## GPU acceleration
+## GPU acceleration (NVIDIA)
 
-The AI extras install the default PyTorch build. For an NVIDIA GPU, install a
-CUDA-enabled PyTorch matching your driver **before** installing this package:
+A CUDA GPU is **10–50× faster** than CPU and the engine uses it automatically
+(`torch.cuda.is_available()`), switching to fast fp16. You just need a
+CUDA-enabled PyTorch.
+
+### Pick the right CUDA channel
+
+Install the PyTorch build that matches your GPU generation **before** installing
+this package — the channel must support your card's compute capability:
+
+| GPU generation | Example cards | PyTorch channel |
+| -------------- | ------------- | --------------- |
+| Blackwell (RTX 50-series, sm_120) | RTX 5090 / **5080** / 5070 | `cu128` (torch ≥ 2.7) |
+| Ada / Ampere (RTX 40/30-series) | RTX 4090, 3080 | `cu124` or `cu121` |
+| Turing (RTX 20-series) | RTX 2080 | `cu121` |
+
+> ⚠️ Using an older channel (e.g. `cu121`) on an RTX 50-series card fails at
+> runtime with `CUDA error: no kernel image is available for execution on the
+> device`. Blackwell needs `cu128`.
+
+### Native install (recommended for GPU)
 
 ```bash
-pip install torch --index-url https://download.pytorch.org/whl/cu121
+# RTX 50-series (e.g. RTX 5080):
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 pip install "image-upscaler[ai]"
+
+# Verify the GPU is seen:
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+
+upscale run photo.jpg -s 4 --gpu-id 0
 ```
 
-Then pass `--gpu-id 0`. On CPU, add `--fp32` (half precision is GPU-only) and
-expect higher-resolution jobs to take noticeably longer; `--tile 512` helps when
-memory is tight.
+On Windows this works either natively or inside WSL2 (with a recent NVIDIA
+driver — the driver provides CUDA to WSL automatically; do **not** install a
+separate CUDA toolkit in WSL).
+
+### Docker with GPU
+
+Requires the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+on the host (already available in Docker Desktop's WSL2 backend with a recent
+NVIDIA driver). Build with a CUDA channel and run with `--gpus all`:
+
+```bash
+# Build a CUDA image for RTX 50-series
+docker build --build-arg INSTALL_AI=true --build-arg TORCH_CHANNEL=cu128 \
+  -t image-upscaler:cuda .
+
+# Run on the GPU
+docker run --rm --gpus all \
+  -v "${PWD}:/work" \
+  -v upscaler-weights:/home/app/.cache/image-upscaler/weights \
+  image-upscaler:cuda run photo.jpg -s 4 --gpu-id 0 -b realesrgan -v
+```
+
+Or via Compose (the `upscaler-gpu` service defaults to `cu128`):
+
+```bash
+docker compose run --rm upscaler-gpu run photo.jpg -s 4 --gpu-id 0
+```
+
+Sanity-check that the container sees the GPU:
+
+```bash
+docker run --rm --gpus all image-upscaler:cuda \
+  python -c "import torch; print(torch.cuda.is_available())"   # -> True
+```
+
+If you see `No CUDA device detected; using fp32 (CPU mode)` in the logs, the
+container isn't getting the GPU — check `--gpus all` and the container toolkit.
+
+### CPU notes
+
+On CPU, the tool automatically uses fp32 (half precision is GPU-only). Expect
+higher-resolution jobs to be slow; `--tile 512` keeps memory bounded.
 
 ## Model weights
 
