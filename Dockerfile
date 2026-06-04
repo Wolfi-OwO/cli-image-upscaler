@@ -50,8 +50,13 @@ RUN apt-get update \
         libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create an unprivileged user.
-RUN useradd --create-home --uid 10001 app
+# Create an unprivileged user and pre-create the model-weights cache with the
+# right ownership. Docker initialises a named volume mounted here by copying
+# this directory's ownership/permissions; without it the volume is root-owned
+# and the `app` user cannot write downloaded weights (Errno 13).
+RUN useradd --create-home --uid 10001 app \
+    && mkdir -p /home/app/.cache/image-upscaler/weights \
+    && chown -R app:app /home/app/.cache
 
 COPY --from=builder /dist/*.whl /tmp/
 

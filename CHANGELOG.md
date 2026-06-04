@@ -19,6 +19,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Half-precision crash on CPU (`not implemented for Half`) — fp32 is now selected
   automatically when no CUDA device is present.
 - Added `torchvision` to the `ai` extra and pinned `numpy<2` for `basicsr`.
+- `Permission denied` writing model weights when a named volume is mounted at the
+  Docker cache path: the weights cache is now pre-created and owned by the `app`
+  user so a fresh volume inherits writable ownership.
 
 ## [0.1.0] - 2026-06-04
 
