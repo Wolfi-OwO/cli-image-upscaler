@@ -125,7 +125,7 @@ upscale run INPUT... [OPTIONS]
   -b, --backend NAME     auto | realesrgan | lanczos    [default: auto]
   -f, --format TEXT      Output format: png, jpg, webp…  (default: keep source)
   -q, --quality INTEGER  Quality for lossy formats (1-100)  [default: 95]
-      --tile INTEGER     Tile size for low-memory GPUs (0 = off)
+      --tile INTEGER     Tile size in px to bound memory  [default: 512; 0 = off]
       --face-enhance     Restore faces with GFPGAN
       --fp32             Full precision (needed on most CPUs)
       --gpu-id INTEGER   GPU device index
