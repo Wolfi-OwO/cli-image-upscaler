@@ -28,6 +28,10 @@ RUN python -m build --wheel --outdir /dist
 FROM python:3.11-slim AS runtime
 
 ARG INSTALL_AI=true
+# PyTorch wheel channel. Default is CPU. For an NVIDIA GPU pass a CUDA channel,
+# e.g. TORCH_CHANNEL=cu128 for RTX 50-series (Blackwell), cu121 for older cards.
+# See https://pytorch.org/get-started/locally/ for the right channel.
+ARG TORCH_CHANNEL=cpu
 
 # OCI image metadata (overridden by CI with real values).
 LABEL org.opencontainers.image.title="image-upscaler" \
@@ -64,10 +68,10 @@ COPY --from=builder /dist/*.whl /tmp/
 # shell as a character class, so the extras must be appended to the real path.
 RUN WHEEL="$(ls /tmp/image_upscaler-*.whl)" \
     && if [ "$INSTALL_AI" = "true" ]; then \
-        # Install CPU-only torch/torchvision first so the heavy CUDA wheels from
-        # PyPI are never pulled in by the AI extras.
+        # Install torch/torchvision from the selected channel first so the AI
+        # extras don't pull a different (e.g. default CUDA) build from PyPI.
         pip install --no-cache-dir torch torchvision \
-            --index-url https://download.pytorch.org/whl/cpu \
+            --index-url "https://download.pytorch.org/whl/${TORCH_CHANNEL}" \
         && pip install --no-cache-dir "${WHEEL}[ai]"; \
     else \
         pip install --no-cache-dir "${WHEEL}"; \

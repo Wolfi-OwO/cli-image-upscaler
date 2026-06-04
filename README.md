@@ -90,6 +90,30 @@ Or with Compose:
 docker compose run --rm upscaler run photo.jpg -s 4 --tile 512
 ```
 
+## GPU (NVIDIA)
+
+A CUDA GPU is **10–50× faster** and is used automatically (fp16). Install a
+PyTorch build matching your card, then pass `--gpu-id 0`:
+
+```bash
+# RTX 50-series (Blackwell, e.g. RTX 5080) needs the cu128 channel:
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+pip install "image-upscaler[ai]"
+upscale run photo.jpg -s 4 --gpu-id 0
+```
+
+Docker on GPU (needs the NVIDIA Container Toolkit + `--gpus all`):
+
+```bash
+docker build --build-arg TORCH_CHANNEL=cu128 -t image-upscaler:cuda .
+docker run --rm --gpus all -v "${PWD}:/work" \
+  image-upscaler:cuda run photo.jpg -s 4 --gpu-id 0
+```
+
+> RTX 50-series requires `cu128` (CUDA 12.8); older `cu121`/`cu124` builds fail
+> with "no kernel image available". See [docs/installation.md](docs/installation.md#gpu-acceleration-nvidia)
+> for the full GPU/WSL2 guide and the per-generation channel table.
+
 ## Usage
 
 ```text
