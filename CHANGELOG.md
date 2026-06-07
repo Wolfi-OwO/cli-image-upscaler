@@ -8,11 +8,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Docker images now also publish to Docker Hub (`wolfiowo/cli-image-upscaler`)
-  alongside GHCR on every tagged release.
-- Documented the release process in CONTRIBUTING.md: bump the version, tag
-  `vX.Y.Z`, and pushing the tag fans out to GitHub Releases, PyPI, GHCR, and
-  Docker Hub automatically.
+- `--strength` option: blend the Real-ESRGAN result toward a plain resize of the
+  source (1.0 = full AI, 0.0 = natural) to reduce the over-smoothed / hallucinated
+  "AI look" and tone down mismatched detail.
 - Pre-flight memory warning before Real-ESRGAN runs: estimates the assembled
   output size and warns when it will likely exceed GPU VRAM (or be RAM-heavy on
   CPU), since tiling cannot bound the full output buffer. Prevents a long run

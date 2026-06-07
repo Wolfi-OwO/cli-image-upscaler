@@ -129,6 +129,14 @@ def run(
     face_enhance: bool = typer.Option(
         False, "--face-enhance", help="Restore faces with GFPGAN (requires AI extras)."
     ),
+    strength: float = typer.Option(
+        1.0,
+        "--strength",
+        min=0.0,
+        max=1.0,
+        help="Blend AI vs. natural detail to reduce the 'AI look' "
+        "(1.0 = full AI, ~0.7 natural-ish, 0.0 = plain resize). Real-ESRGAN only.",
+    ),
     sharpen: float = typer.Option(
         0.0,
         "--sharpen",
@@ -174,6 +182,7 @@ def run(
             backend=backend,
             tile=tile,
             face_enhance=face_enhance,
+            strength=strength,
             sharpen=sharpen,
             dpi=dpi,
             fp32=fp32,

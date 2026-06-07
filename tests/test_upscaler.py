@@ -78,6 +78,17 @@ def test_sharpen_keeps_size_and_changes_pixels() -> None:
     assert list(sharp.getdata()) != list(plain.getdata())
 
 
+def test_strength_does_not_affect_lanczos() -> None:
+    # Blending toward a natural resize only applies to the Real-ESRGAN backend.
+    src = Image.new("RGB", (8, 8), (10, 20, 30))
+    src.putpixel((2, 2), (200, 100, 50))
+    plain = Upscaler(UpscaleConfig(scale=2, backend=Backend.LANCZOS)).upscale_image(src)
+    blended = Upscaler(UpscaleConfig(scale=2, backend=Backend.LANCZOS, strength=0.5)).upscale_image(
+        src
+    )
+    assert list(blended.getdata()) == list(plain.getdata())
+
+
 def test_sharpen_zero_is_noop() -> None:
     src = Image.new("RGB", (8, 8), (10, 20, 30))
     src.putpixel((2, 2), (200, 100, 50))

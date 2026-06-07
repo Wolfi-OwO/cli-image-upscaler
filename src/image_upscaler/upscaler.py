@@ -60,6 +60,9 @@ class UpscaleConfig:
     fp32: bool = False
     gpu_id: int | None = None
     download: bool = True
+    # Blend toward a plain resize (1.0 = full AI, 0.0 = natural) to dial back the
+    # over-smoothed / hallucinated "AI look" of Real-ESRGAN.
+    strength: float = 1.0
     # Post-processing: unsharp-mask strength (0 = off, ~1.0 subtle, ~2.0 strong).
     sharpen: float = 0.0
     # DPI metadata written into the output file (does not change pixels/detail).
@@ -165,6 +168,8 @@ class Upscaler:
             result = self._upscale_realesrgan(image)
         else:
             result = self._upscale_lanczos(image)
+        if self.backend is Backend.REALESRGAN and self.config.strength < 1.0:
+            result = self._blend_natural(image, result)
         if self.config.sharpen > 0:
             result = self._apply_sharpen(result)
         return result
@@ -177,6 +182,16 @@ class Upscaler:
         return destination
 
     # -- post-processing ---------------------------------------------------
+    def _blend_natural(self, source: Image.Image, ai: Image.Image) -> Image.Image:
+        """Blend the AI result toward a plain resize of the source.
+
+        ``strength`` of 1.0 returns the AI result unchanged; lower values mix in
+        the original's natural texture to reduce the over-smoothed look and tone
+        down hallucinated detail.
+        """
+        natural = source.resize(ai.size, Image.LANCZOS).convert(ai.mode)
+        return Image.blend(natural, ai, self.config.strength)
+
     def _apply_sharpen(self, image: Image.Image) -> Image.Image:
         """Apply an unsharp mask to boost perceived sharpness."""
         # Strength scales the unsharp "percent"; clamp to a sane range.

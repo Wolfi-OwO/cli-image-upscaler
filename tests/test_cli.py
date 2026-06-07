@@ -67,6 +67,8 @@ def test_run_with_sharpen_and_dpi(sample_image: Path, tmp_path: Path) -> None:
             "2",
             "-b",
             "lanczos",
+            "--strength",
+            "0.7",
             "--sharpen",
             "1.5",
             "--dpi",

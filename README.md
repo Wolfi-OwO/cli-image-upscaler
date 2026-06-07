@@ -129,6 +129,7 @@ upscale run INPUT... [OPTIONS]
   -q, --quality INTEGER  Quality for lossy formats (1-100)  [default: 95]
       --tile INTEGER     Tile size in px to bound memory  [default: 512; 0 = off]
       --face-enhance     Restore faces with GFPGAN
+      --strength FLOAT   Blend AI↔natural to reduce the "AI look"  [default: 1.0]
       --sharpen FLOAT    Unsharp-mask strength for a crisper finish (0 = off)
       --dpi INTEGER      Write DPI metadata (print size only; adds no detail)
       --fp32             Full precision (needed on most CPUs)

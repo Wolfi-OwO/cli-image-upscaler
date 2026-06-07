@@ -30,6 +30,7 @@ scanned for supported images (`--recursive` to descend into subfolders).
 | `--suffix TEXT` | `_upscaled_<scale>x` | Filename suffix for generated outputs. |
 | `--tile INTEGER` | `512` | Tile size (px) to bound memory. `0` disables tiling (fastest/seamless, but can exhaust RAM/VRAM on large images). |
 | `--face-enhance` | off | Restore faces with GFPGAN. |
+| `--strength FLOAT` | `1.0` | Blend AI vs. natural detail (Real-ESRGAN only): `1.0` = full AI, `~0.7` natural-ish, `0.0` = plain resize. Lower it to reduce the over-smoothed/hallucinated "AI look". |
 | `--sharpen FLOAT` | `0.0` | Unsharp-mask strength for a crisper finish (0 = off, ~1.0 subtle, ~2.0 strong). |
 | `--dpi INTEGER` | none | Write DPI metadata into the output. Affects print size only — **does not add pixels or visible detail**. |
 | `--fp32` | off | Full precision (required on most CPUs). |
