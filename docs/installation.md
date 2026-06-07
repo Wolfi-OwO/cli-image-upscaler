@@ -153,7 +153,11 @@ air-gapped or CI environments where you pre-seed the cache.
 - **`basicsr` import error mentioning `functional_tensor`** — a known
   incompatibility with newer `torchvision`. Pin `torchvision<0.17` or apply the
   upstream BasicSR patch. See [FAQ](faq.md).
-- **Out-of-memory on GPU** — lower `--tile` (e.g. `--tile 256`) or use a smaller scale.
+- **Out-of-memory on GPU** — usually the *output* is simply too large. Real-ESRGAN
+  assembles the full result in VRAM, so `--tile` does **not** help here (it only
+  bounds per-tile compute). A 16× upscale of a multi-megapixel photo can need tens
+  of GB (e.g. 8 MP × 16² ≈ 2 gigapixels ≈ 24 GB). **Reduce `--scale`** — `-s 4` is
+  the right choice for normal photos; reserve `-s 16` for tiny inputs like icons.
 - **`docker: ... failed to discover GPU vendor from CDI: no known GPU vendor found`**
   (or `could not select device driver "" with capabilities: [[gpu]]`) — the
   NVIDIA Container Toolkit is not wired into Docker. The image is fine; the host

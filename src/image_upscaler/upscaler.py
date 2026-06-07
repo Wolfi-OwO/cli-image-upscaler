@@ -184,6 +184,44 @@ class Upscaler:
         percent = int(strength * 100)
         return image.filter(ImageFilter.UnsharpMask(radius=2, percent=percent, threshold=2))
 
+    def _warn_if_oversized(self, image: Image.Image) -> None:  # pragma: no cover
+        """Warn before processing when the output is likely to exhaust memory.
+
+        Real-ESRGAN assembles the *full* output on the active device, so the
+        output buffer needs roughly ``width * height * 3 * 4`` bytes regardless
+        of ``--tile`` (tiling only bounds per-tile compute). A 16x upscale of a
+        multi-megapixel photo can therefore need tens of GB and OOM even on a
+        large GPU.
+        """
+        import torch
+
+        target_pixels = (image.width * self.config.scale) * (image.height * self.config.scale)
+        target_mp = target_pixels / 1e6
+        output_gb = target_pixels * 3 * 4 / 1e9  # fp32 RGB assembled output
+
+        if torch.cuda.is_available():
+            device = self.config.gpu_id or 0
+            total_gb = torch.cuda.get_device_properties(device).total_memory / 1e9
+            if output_gb > 0.6 * total_gb:
+                logger.warning(
+                    "Target is ~%.0f MP and needs ~%.1f GB to assemble, but GPU %d "
+                    "has only %.1f GB — this will very likely run out of memory. "
+                    "Tiling cannot help (the full output lives in VRAM); use a "
+                    "smaller --scale, e.g. -s 4.",
+                    target_mp,
+                    output_gb,
+                    device,
+                    total_gb,
+                )
+        elif target_mp > 64:
+            extra = "" if self.config.tile else " Add --tile 512 and"
+            logger.warning(
+                "Target is ~%.0f MP, which can be very slow / RAM-heavy on CPU.%s "
+                "consider a smaller --scale.",
+                target_mp,
+                extra,
+            )
+
     # -- Lanczos backend ---------------------------------------------------
     def _upscale_lanczos(self, image: Image.Image) -> Image.Image:
         target = (image.width * self.config.scale, image.height * self.config.scale)
@@ -192,18 +230,9 @@ class Upscaler:
     # -- Real-ESRGAN backend ----------------------------------------------
     def _upscale_realesrgan(self, image: Image.Image) -> Image.Image:  # pragma: no cover
         import numpy as np
-        import torch
 
+        self._warn_if_oversized(image)
         upsampler = self._upsampler
-        if not torch.cuda.is_available() and self.config.tile == 0:
-            megapixels = (image.width * image.height) / 1e6
-            if megapixels * self.config.scale**2 > 32:
-                logger.warning(
-                    "Large output on CPU without tiling can be very slow or run "
-                    "out of memory (≈%.0f MP target). Consider '--tile 512' "
-                    "and/or a smaller '--scale'.",
-                    megapixels * self.config.scale**2,
-                )
         has_alpha = image.mode in ("RGBA", "LA")
         rgb = image.convert("RGBA" if has_alpha else "RGB")
 

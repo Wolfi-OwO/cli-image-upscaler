@@ -8,6 +8,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Pre-flight memory warning before Real-ESRGAN runs: estimates the assembled
+  output size and warns when it will likely exceed GPU VRAM (or be RAM-heavy on
+  CPU), since tiling cannot bound the full output buffer. Prevents a long run
+  that ends in CUDA OOM (e.g. 16x of a multi-MP photo ≈ tens of GB).
 - `--sharpen` option: optional unsharp-mask finish for a crisper result.
 - `--dpi` option: write print-resolution metadata into the output (does not
   change pixels or visible sharpness).
