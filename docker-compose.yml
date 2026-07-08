@@ -1,0 +1,48 @@
+# Convenience compose file for local use.
+#
+#   CPU:  docker compose run --rm upscaler run input.png -s 4
+#   GPU:  docker compose run --rm upscaler-gpu run input.png -s 4
+#
+# Mounts the current directory as /work and persists downloaded model weights
+# in a named volume so they are not re-downloaded on every run.
+services:
+  # CPU service (default).
+  upscaler:
+    build:
+      context: .
+      args:
+        # AI (Real-ESRGAN) backend is built by default; set INSTALL_AI=false
+        # for a lean Lanczos-only image.
+        INSTALL_AI: "${INSTALL_AI:-true}"
+    image: image-upscaler:${TAG:-local}
+    volumes:
+      - ./:/work
+      - upscaler-weights:/home/app/.cache/image-upscaler/weights
+    # Override the entrypoint args on the command line, e.g.:
+    #   docker compose run --rm upscaler run photo.jpg -s 8
+    command: ["--help"]
+
+  # GPU service. Requires the NVIDIA Container Toolkit on the host.
+  # TORCH_CHANNEL defaults to cu128 (RTX 50-series / Blackwell); override for
+  # older cards, e.g. TORCH_CHANNEL=cu121 docker compose build upscaler-gpu
+  upscaler-gpu:
+    build:
+      context: .
+      args:
+        INSTALL_AI: "true"
+        TORCH_CHANNEL: "${TORCH_CHANNEL:-cu128}"
+    image: image-upscaler:${TAG:-gpu}
+    volumes:
+      - ./:/work
+      - upscaler-weights:/home/app/.cache/image-upscaler/weights
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: ["--help"]
+
+volumes:
+  upscaler-weights:
