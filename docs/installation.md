@@ -37,15 +37,20 @@ pip install -e ".[ai]"     # or ".[dev,ai]" for development
 
 ## Docker
 
+Published to both Docker Hub and GHCR on every release — `:latest` tracks the
+most recent tagged release, `:main` tracks the tip of `main`.
+
 ```bash
 # Pull the published image (includes the Real-ESRGAN AI backend)
+docker pull wolfiowo/cli-image-upscaler:latest
+# ...or from GHCR:
 docker pull ghcr.io/wolfi-owo/cli-image-upscaler:latest
 
 # Run — persist downloaded model weights in a named volume
 docker run --rm \
   -v "${PWD}:/work" \
   -v upscaler-weights:/home/app/.cache/image-upscaler/weights \
-  ghcr.io/wolfi-owo/cli-image-upscaler:latest run photo.jpg -s 4 --tile 512
+  wolfiowo/cli-image-upscaler:latest run photo.jpg -s 4 --tile 512
 
 # Or build a lean Lanczos-only image (no PyTorch)
 docker build --build-arg INSTALL_AI=false -t image-upscaler:lite .

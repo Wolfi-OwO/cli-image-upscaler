@@ -2,11 +2,18 @@
 
 ## Supported versions
 
-The latest released minor version receives security updates.
+This project ships frequent releases (PyPI, Docker images, and GitHub Releases
+are all published together from the same git tag — see the
+[release process](CONTRIBUTING.md#release-process) in CONTRIBUTING.md). Only
+the **most recently published release** is supported with security fixes.
 
-| Version | Supported |
-| ------- | --------- |
-| 0.1.x   | ✅        |
+| Version        | Supported |
+| -------------- | --------- |
+| Latest release | ✅        |
+| Anything older | ❌        |
+
+If you're on an older version, please upgrade to the latest release before
+reporting a vulnerability — the fix may already be out.
 
 ## Reporting a vulnerability
 

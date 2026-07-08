@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Docker images now also publish to Docker Hub (`wolfiowo/cli-image-upscaler`)
+  alongside GHCR on every tagged release.
+- Documented the release process in CONTRIBUTING.md: bump the version, tag
+  `vX.Y.Z`, and pushing the tag fans out to GitHub Releases, PyPI, GHCR, and
+  Docker Hub automatically.
 - Pre-flight memory warning before Real-ESRGAN runs: estimates the assembled
   output size and warns when it will likely exceed GPU VRAM (or be RAM-heavy on
   CPU), since tiling cannot bound the full output buffer. Prevents a long run
@@ -22,6 +27,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Docker `:latest` now tracks the most recent tagged **release** instead of the
+  tip of `main`, so pulling `:latest` no longer risks unreleased/untested code.
+  Use the `:main` tag to follow the branch instead.
+- SECURITY.md's supported-versions policy is now version-agnostic (latest
+  release only) instead of a hardcoded version table that goes stale.
 - Docker images now build with the Real-ESRGAN **AI backend by default**. Build
   with `--build-arg INSTALL_AI=false` for a lean Lanczos-only image.
 - `--tile` now defaults to **512** (was 0) so large images don't exhaust RAM/VRAM

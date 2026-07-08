@@ -53,6 +53,24 @@ Use clear, imperative commit messages (e.g. `Add --tile option for low-memory GP
 [Conventional Commits](https://www.conventionalcommits.org/) are appreciated but not
 required.
 
+## Release process
+
+Releases are cut manually by pushing a version tag — there's no auto-release on
+every merge, so `main` can carry multiple merged changes before a release goes
+out.
+
+1. Bump `version` in `pyproject.toml` (semantic versioning).
+2. Move the `CHANGELOG.md` **Unreleased** entries under a new `## [X.Y.Z]`
+   heading (dated).
+3. Commit, then tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. Pushing the tag fans out automatically to every distribution channel:
+   - **GitHub Release** with the built wheel/sdist attached and generated
+     release notes ([release.yml](.github/workflows/release.yml)).
+   - **PyPI** publish via Trusted Publishing ([release.yml](.github/workflows/release.yml)).
+   - **GHCR** (`ghcr.io/wolfi-owo/cli-image-upscaler`) and **Docker Hub**
+     (`docker.io/wolfiowo/cli-image-upscaler`) image push, tagged with the
+     version and `latest` ([docker.yml](.github/workflows/docker.yml)).
+
 ## Reporting bugs / requesting features
 
 Use the [issue templates](https://github.com/Wolfi-OwO/cli-image-upscaler/issues/new/choose).
