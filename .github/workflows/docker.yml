@@ -23,6 +23,10 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      # Resolved once here because `secrets` can't be used directly inside
+      # compound if:/with: expressions elsewhere in the job.
+      DOCKERHUB_ENABLED: ${{ secrets.DOCKERHUB_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +44,7 @@ jobs:
 
       - name: Log in to Docker Hub
         # Skips gracefully until DOCKERHUB_USERNAME/DOCKERHUB_TOKEN secrets exist.
-        if: github.event_name != 'pull_request' && secrets.DOCKERHUB_TOKEN != ''
+        if: github.event_name != 'pull_request' && env.DOCKERHUB_ENABLED == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -52,7 +56,7 @@ jobs:
         with:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            ${{ secrets.DOCKERHUB_TOKEN != '' && format('docker.io/{0}', env.DOCKERHUB_IMAGE) || '' }}
+            ${{ env.DOCKERHUB_ENABLED == 'true' && format('docker.io/{0}', env.DOCKERHUB_IMAGE) || '' }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
