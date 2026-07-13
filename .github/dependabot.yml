@@ -1,10 +1,25 @@
+# Dependabot, tuned for silence rather than immediacy.
+#
+# It used to run weekly across three ecosystems with a pip limit of 10, which
+# meant a fresh pull request — and a fresh email — most weeks. The updates were
+# worth having; the mail was not.
+#
+# Three knobs do the quieting, and they compound:
+#   interval: monthly          one wake-up a month, not four
+#   groups with patterns "*"   every bump in an ecosystem lands in ONE PR
+#   open-pull-requests-limit   at most one PR open per ecosystem at a time
+#
+# Major versions are still allowed here (unlike the other repos): a CLI that
+# pins Real-ESRGAN and numpy actually wants to hear about numpy 3 and a newer
+# Python base image. They just arrive once a month, inside the group PR.
+
 version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
       python-dependencies:
         patterns: ["*"]
@@ -12,7 +27,8 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
       github-actions:
         patterns: ["*"]
@@ -20,4 +36,8 @@ updates:
   - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      docker:
+        patterns: ["*"]
