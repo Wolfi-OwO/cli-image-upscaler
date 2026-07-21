@@ -18,9 +18,7 @@ import pytest
 AI_PACKAGES = ["basicsr", "realesrgan", "gfpgan"]
 
 ai_installed = importlib.util.find_spec("torch") is not None
-requires_ai = pytest.mark.skipif(
-    not ai_installed, reason="[ai] extra not installed"
-)
+requires_ai = pytest.mark.skipif(not ai_installed, reason="[ai] extra not installed")
 
 
 @requires_ai
@@ -41,6 +39,6 @@ def test_numpy_is_v1() -> None:
     """basicsr relies on aliases NumPy 2.x removed."""
     import numpy
 
-    assert numpy.__version__.startswith("1."), (
-        f"basicsr requires NumPy 1.x, found {numpy.__version__}"
-    )
+    assert numpy.__version__.startswith(
+        "1."
+    ), f"basicsr requires NumPy 1.x, found {numpy.__version__}"
