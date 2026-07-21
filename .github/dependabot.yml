@@ -12,7 +12,7 @@ updates:
     directory: /
     schedule:
       interval: monthly
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 1
     labels:
       - dependencies
     groups:
@@ -30,6 +30,7 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
     labels:
       - ci
     groups:
@@ -46,8 +47,12 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
     labels:
       - docker
+    groups:
+      docker:
+        patterns: ["*"]
     ignore:
       # The base image is python:3.x-slim, so a 3.11 -> 3.14 bump is semver-MINOR,
       # not major — the major-only rule below never caught it and dependabot opened
