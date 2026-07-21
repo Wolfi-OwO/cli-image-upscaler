@@ -46,7 +46,7 @@ dependencies = [
 # with KeyError: '__version__'. The base package has no such limit — only [ai].
 ai = [
     # basicsr is incompatible with NumPy 2.x (removed deprecated aliases).
-    "numpy>=1.24,<2",
+    "numpy>=1.24,<3",
     # torchvision <0.17 is REQUIRED, not a preference. basicsr, realesrgan and
     # gfpgan all import torchvision.transforms.functional_tensor, which was
     # removed in torchvision 0.17. With an open upper bound pip resolves 0.28
