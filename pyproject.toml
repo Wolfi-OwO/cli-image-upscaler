@@ -41,6 +41,9 @@ dependencies = [
 
 [project.optional-dependencies]
 # AI super-resolution backend. Heavy (pulls in PyTorch).
+#
+# Requires Python <= 3.12: basicsr's setup.py breaks under PEP 667 (Python 3.13+)
+# with KeyError: '__version__'. The base package has no such limit — only [ai].
 ai = [
     # basicsr is incompatible with NumPy 2.x (removed deprecated aliases).
     "numpy>=1.24,<2",

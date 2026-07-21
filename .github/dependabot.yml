@@ -49,5 +49,14 @@ updates:
     labels:
       - docker
     ignore:
+      # The base image is python:3.x-slim, so a 3.11 -> 3.14 bump is semver-MINOR,
+      # not major — the major-only rule below never caught it and dependabot opened
+      # an unmergeable PR. The AI stack hard-caps us at Python 3.12 (see Dockerfile),
+      # so minor bumps are excluded too. Patch bumps still flow, which is where the
+      # security fixes are.
+      - dependency-name: 'python'
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
       - dependency-name: '*'
         update-types: [version-update:semver-major]
