@@ -53,7 +53,7 @@ ai = [
     # and every one of them fails at import — while `pip install` still exits 0,
     # so the Docker build stays green and only breaks for the end user.
     # tests/test_ai_imports.py guards this; do not relax without running it.
-    "torch>=2.1,<2.2",
+    "torch>=2.1,<2.14",
     "torchvision>=0.16,<0.17",
     "realesrgan>=0.3.0",
     "basicsr>=1.4.2",
