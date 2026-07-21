@@ -82,7 +82,10 @@ RUN WHEEL="$(ls /tmp/image_upscaler-*.whl)" \
     && if [ "$INSTALL_AI" = "true" ]; then \
         # Install torch/torchvision from the selected channel first so the AI
         # extras don't pull a different (e.g. default CUDA) build from PyPI.
-        pip install --no-cache-dir torch torchvision \
+        # The bounds must match pyproject's [ai] extra: unpinned, this resolves
+        # torchvision 0.28, and the next command then downgrades it from PyPI —
+        # replacing the channel build with a multi-GB CUDA wheel.
+        pip install --no-cache-dir "torch>=2.1,<2.2" "torchvision>=0.16,<0.17" \
             --index-url "https://download.pytorch.org/whl/${TORCH_CHANNEL}" \
         && pip install --no-cache-dir "${WHEEL}[ai]"; \
     else \
