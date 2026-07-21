@@ -10,6 +10,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/wolfiowo/cli-image-upscaler?sort=semver&label=docker%20hub)](https://hub.docker.com/r/wolfiowo/cli-image-upscaler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+![Repo visitors](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Wolfi-OwO/Wolfi-OwO/main/traffic/badges/cli-image-upscaler.json)
 
 </div>
 
