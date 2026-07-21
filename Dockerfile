@@ -10,6 +10,18 @@
 # -----------------------------------------------------------------------------
 # Stage 1 — build the wheel
 # -----------------------------------------------------------------------------
+#
+# PYTHON VERSION IS CAPPED AT 3.12 — do not bump to 3.13+.
+#
+# basicsr (via the [ai] extra -> realesrgan/gfpgan) reads its version in setup.py
+# with the pre-PEP-667 idiom:
+#
+#     exec(compile(...)); return locals()['__version__']
+#
+# PEP 667 (Python 3.13) made locals() return a snapshot, so exec()'s writes are no
+# longer visible and the build dies with KeyError: '__version__'. basicsr's last
+# release was 2022 and it is unmaintained, so this will not be fixed upstream.
+# Dependabot is configured to skip minor bumps of this image for the same reason.
 FROM python:3.11-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1 \
