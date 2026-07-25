@@ -2,11 +2,15 @@
 
 `pip install` succeeding tells us nothing about whether the AI backend works:
 basicsr, realesrgan and gfpgan all import torchvision.transforms.functional_tensor,
-which torchvision removed in 0.17. Installation still exits 0, so a bad resolution
-ships a green build and an image that fails the first time a user runs it.
+which torchvision removed in 0.17. image_upscaler.upscaler installs a runtime
+compat shim (_install_basicsr_compat) before importing realesrgan to cover this,
+so pyproject.toml/Dockerfile/ci.yml deliberately do NOT cap torchvision below
+0.17 — a <0.17 cap would make cu128 (RTX 50-series / Blackwell) impossible,
+since cu128 only ships torchvision>=0.22.
 
-These tests import the packages for real. They skip when the extra isn't installed
-(the default dev environment), and run in CI's dedicated ai-extras job.
+These tests import the packages for real (through the shim, not around it), and
+they skip when the extra isn't installed (the default dev environment), running
+instead in CI's dedicated ai-extras job.
 """
 
 from __future__ import annotations
@@ -40,7 +44,14 @@ def test_ai_package_imports(package: str) -> None:
 
 @requires_ai
 def test_torchvision_has_functional_tensor() -> None:
-    """The specific module the AI stack depends on, pinned via torchvision<0.17."""
+    """The module basicsr imports. torchvision>=0.17 removed it, so we install a
+    runtime shim before importing realesrgan; go through that real entry point
+    (not a raw import) so this test still means something once torchvision>=0.17
+    is the common case, rather than only passing by accident on an old pin.
+    """
+    from image_upscaler.upscaler import _install_basicsr_compat
+
+    _install_basicsr_compat()
     import torchvision.transforms.functional_tensor  # noqa: F401
 
 
@@ -54,19 +65,29 @@ def test_numpy_is_v1() -> None:
     ), f"basicsr requires NumPy 1.x, found {numpy.__version__}"
 
 
+_OTHER_PIN_LOCATIONS = [
+    ROOT / "Dockerfile",
+    ROOT / ".github" / "workflows" / "ci.yml",
+]
+
+
 @pytest.mark.parametrize("package", ["torch", "torchvision"])
-def test_dockerfile_torch_pin_matches_pyproject(package: str) -> None:
-    """The Dockerfile hardcodes its own torch/torchvision bounds (to force
-    installing from the CUDA/CPU wheel index before the [ai] extra would
-    otherwise re-resolve them from plain PyPI). That duplicate copy has already
-    drifted from pyproject.toml once: dependabot bumped pyproject.toml's upper
-    bound from <2.2 to <2.14, the Dockerfile's copy was not updated, and
-    `docker build --build-arg TORCH_CHANNEL=cu128` then failed outright because
-    cu128 only ships torch>=2.7 (nothing satisfies a stale "<2.2" ceiling).
+@pytest.mark.parametrize("other_path", _OTHER_PIN_LOCATIONS, ids=lambda p: p.name)
+def test_torch_pin_matches_pyproject(package: str, other_path: Path) -> None:
+    """The Dockerfile and ci.yml each hardcode their own torch/torchvision bounds
+    (to force installing from a specific wheel index before the [ai] extra would
+    otherwise re-resolve them from plain PyPI). Those duplicate copies have
+    already drifted from pyproject.toml *twice*: dependabot bumped pyproject's
+    torch upper bound (<2.2 -> <2.14) without the Dockerfile/ci.yml copies
+    following, and `docker build --build-arg TORCH_CHANNEL=cu128` then failed
+    outright because cu128 only ships torch>=2.7 (nothing satisfies a stale
+    "<2.2" ceiling).
 
     This needs no [ai] install, so it runs in the default suite (and therefore
     on dependabot PRs), not only in CI's gated ai-extras job.
     """
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
-    assert _spec(dockerfile, package) == _spec(pyproject, package)
+    other = other_path.read_text(encoding="utf-8")
+    assert _spec(other, package) == _spec(
+        pyproject, package
+    ), f"{other_path.name}'s {package} pin has drifted from pyproject.toml"
