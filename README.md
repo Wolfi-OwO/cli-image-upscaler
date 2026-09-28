@@ -9,8 +9,8 @@
 [![Docker](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/docker.yml/badge.svg)](https://github.com/Wolfi-OwO/cli-image-upscaler/actions/workflows/docker.yml)
 [![Docker Hub](https://img.shields.io/docker/v/wolfiowo/cli-image-upscaler?sort=semver&label=docker%20hub)](https://hub.docker.com/r/wolfiowo/cli-image-upscaler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
-![Repo visitors](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Wolfi-OwO/Wolfi-OwO/main/traffic/badges/cli-image-upscaler.json)
+
+![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
 
 </div>
 
@@ -19,6 +19,10 @@ while recovering detail using the open-source [Real-ESRGAN](https://github.com/x
 super-resolution networks. It is 100% free, runs locally (no cloud, no upload, no
 watermark), and falls back to high-quality Lanczos resampling when the AI stack
 isn't installed.
+
+![Before/after: a 220x270 crop upscaled 4x with `upscale run`, nearest-neighbor resize on the left for reference against the tool's actual output on the right](docs/screenshots/before-after.png)
+
+<div align="center"><sub>Left: the source crop scaled up with nearest-neighbor (no reconstruction). Right: <code>upscale run source-crop.png -s 4 -f png</code> on the same crop — this machine has no PyTorch installed, so the AI backend fell back to its documented Lanczos path (see "Graceful fallback" below).</sub></div>
 
 ---
 
@@ -33,7 +37,35 @@ isn't installed.
 - **Docker image** and **GitHub Actions** for reproducible, scanned builds.
 - **Privacy-first** — your images never leave your machine.
 
-## Quick start
+## Why it is built this way
+
+Real-ESRGAN's networks upscale **4× natively**. To reach higher factors the image
+is passed through the network multiple times (4× → 16×) and resized to the exact
+target with Lanczos for any in-between factor. This recovers far more detail than a
+single naïve resize. Read more in [docs/how-it-works.md](docs/how-it-works.md).
+
+> **A note on "16× better quality":** upscaling *reconstructs* plausible detail —
+> it cannot invent information that was never captured. 16× means **16× the
+> resolution** (pixel dimensions) with AI-restored sharpness, not 16× the optical
+> fidelity of the original scene.
+
+- **Graceful fallback, not a hard PyTorch dependency** — the base package works with Lanczos alone, so the CLI still runs (and the AI-heavy install can be skipped) on a machine without a GPU or a working PyTorch build, like the one this README's own before/after image was captured on.
+- **`--strength` exists because Real-ESRGAN's output can look over-smoothed or invent detail that wasn't there.** Blending back toward a plain resize (default `1.0` = full AI) tones that "AI look" down instead of hiding it behind a sharpening filter.
+
+Dependencies and the Docker image are scanned with **Trivy** and **CodeQL** on every push, PR, and weekly schedule.
+
+## Tech stack
+
+| Layer      | Tech                                                                 |
+| ---------- | --------------------------------------------------------------------- |
+| Language   | Python ≥ 3.9                                                           |
+| CLI        | Typer, Rich                                                            |
+| Imaging    | Pillow, Lanczos resampling (built-in fallback backend)                |
+| AI backend | Real-ESRGAN, BasicSR, GFPGAN (face restoration), PyTorch + torchvision (`[ai]` extra) |
+| Packaging  | Hatchling, Docker (multi-stage, optional CUDA build)                  |
+| Tooling    | pytest + pytest-cov, ruff, black, mypy, pre-commit                     |
+
+## Getting started
 
 ```bash
 # Install with the AI backend (recommended)
@@ -59,7 +91,7 @@ pip install image-upscaler          # Lanczos backend only
 upscale run photo.jpg -s 4 -b lanczos
 ```
 
-## Installation
+### Installation
 
 | Method      | Command                                                | Backend                                       |
 | ----------- | ------------------------------------------------------ | --------------------------------------------- |
@@ -70,7 +102,7 @@ upscale run photo.jpg -s 4 -b lanczos
 
 See [docs/installation.md](docs/installation.md) for GPU setup and troubleshooting.
 
-## Docker
+### Docker
 
 ```bash
 # Build the image (includes the Real-ESRGAN AI backend by default)
@@ -92,7 +124,7 @@ Or with Compose:
 docker compose run --rm upscaler run photo.jpg -s 4 --tile 512
 ```
 
-## GPU (NVIDIA)
+### GPU (NVIDIA)
 
 A CUDA GPU is **10–50× faster** and is used automatically (fp16). Install a
 PyTorch build matching your card, then pass `--gpu-id 0`:
@@ -115,6 +147,17 @@ docker run --rm --gpus all -v "${PWD}:/work" \
 > RTX 50-series requires `cu128` (CUDA 12.8); older `cu121`/`cu124` builds fail
 > with "no kernel image available". See [docs/installation.md](docs/installation.md#gpu-acceleration-nvidia)
 > for the full GPU/WSL2 guide and the per-generation channel table.
+
+### Development
+
+```bash
+git clone https://github.com/Wolfi-OwO/cli-image-upscaler
+cd cli-image-upscaler
+make install        # editable install with dev tools
+make check          # lint + type-check + tests
+make test           # tests with coverage
+make scan           # Trivy filesystem vulnerability scan
+```
 
 ## Usage
 
@@ -149,35 +192,33 @@ upscale models
 
 Full reference: [docs/usage.md](docs/usage.md).
 
-## How does 16× work?
+## Project structure
 
-Real-ESRGAN's networks upscale **4× natively**. To reach higher factors the image
-is passed through the network multiple times (4× → 16×) and resized to the exact
-target with Lanczos for any in-between factor. This recovers far more detail than a
-single naïve resize. Read more in [docs/how-it-works.md](docs/how-it-works.md).
-
-> **A note on "16× better quality":** upscaling *reconstructs* plausible detail —
-> it cannot invent information that was never captured. 16× means **16× the
-> resolution** (pixel dimensions) with AI-restored sharpness, not 16× the optical
-> fidelity of the original scene.
-
-## Development
-
-```bash
-git clone https://github.com/Wolfi-OwO/cli-image-upscaler
-cd cli-image-upscaler
-make install        # editable install with dev tools
-make check          # lint + type-check + tests
-make test           # tests with coverage
-make scan           # Trivy filesystem vulnerability scan
+```text
+.
+├── src/image_upscaler/    # Package source
+│   ├── cli.py             # Typer app — `run` and `models` commands
+│   ├── upscaler.py        # Real-ESRGAN / Lanczos upscaling pipeline
+│   ├── models.py          # Model registry and weight downloads
+│   ├── utils.py           # Image I/O, tiling, format handling
+│   └── exceptions.py      # CLI-facing error types
+├── tests/                 # pytest suite (CLI, upscaler, models, utils)
+├── docs/                  # Installation, usage, how-it-works, FAQ
+├── Dockerfile             # Multi-stage build (AI or lean Lanczos-only)
+└── docker-compose.yml
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+## Documentation
 
-## Security
-
-Dependencies and the Docker image are scanned with **Trivy** and **CodeQL** on every
-push, PR, and weekly schedule. To report a vulnerability, see [SECURITY.md](SECURITY.md).
+| Doc                                            | What's in it                                   |
+| ----------------------------------------------- | ----------------------------------------------- |
+| [docs/installation.md](docs/installation.md)     | GPU setup and troubleshooting                    |
+| [docs/usage.md](docs/usage.md)                   | Full CLI option reference                        |
+| [docs/how-it-works.md](docs/how-it-works.md)     | How the 4×-chaining and backends work            |
+| [docs/faq.md](docs/faq.md)                       | Frequently asked questions                       |
+| [CHANGELOG.md](CHANGELOG.md)                     | Release history                                  |
+| [CONTRIBUTING.md](CONTRIBUTING.md)               | How to propose a change                          |
+| [SECURITY.md](SECURITY.md)                       | How to report a vulnerability                    |
 
 ## Acknowledgements
 
