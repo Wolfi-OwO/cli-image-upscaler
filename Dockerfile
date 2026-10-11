@@ -86,7 +86,7 @@ RUN WHEEL="$(ls /tmp/image_upscaler-*.whl)" \
         # tests/test_ai_imports.py enforces this). No torchvision upper bound:
         # cu128 (RTX 50-series) only ships torchvision>=0.22, and the runtime
         # shim in image_upscaler.upscaler handles the functional_tensor removal.
-        pip install --no-cache-dir "torch>=2.1,<2.14" "torchvision>=0.16" \
+        pip install --no-cache-dir "torch>=2.1,<2.15" "torchvision>=0.16" \
             --index-url "https://download.pytorch.org/whl/${TORCH_CHANNEL}" \
         && pip install --no-cache-dir "${WHEEL}[ai]"; \
     else \

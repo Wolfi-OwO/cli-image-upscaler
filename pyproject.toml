@@ -54,7 +54,7 @@ ai = [
     # makes cu128 (RTX 50-series / Blackwell) impossible: cu128 only ships
     # torchvision>=0.22. tests/test_ai_imports.py exercises the shim for real;
     # do not reintroduce an upper bound without running it.
-    "torch>=2.1,<2.14",
+    "torch>=2.1,<2.15",
     "torchvision>=0.16",
     "realesrgan>=0.3.0",
     "basicsr>=1.4.2",
