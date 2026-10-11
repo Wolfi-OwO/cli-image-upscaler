@@ -39,6 +39,11 @@ def _spec(text: str, package: str) -> str:
 @pytest.mark.parametrize("package", AI_PACKAGES)
 def test_ai_package_imports(package: str) -> None:
     """Each AI package must actually import, not merely be installed."""
+    # Through the shim like production does: with torchvision>=0.17 a raw import
+    # of basicsr fails before image_upscaler has had a chance to patch it.
+    from image_upscaler.upscaler import _install_basicsr_compat
+
+    _install_basicsr_compat()
     __import__(package)
 
 
