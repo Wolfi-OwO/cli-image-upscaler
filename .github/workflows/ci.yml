@@ -39,7 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pinned: Python 3.9 has no build for ubuntu-latest (26.04), and the package still supports it.
+        os: [ubuntu-24.04, windows-latest, macos-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v7
@@ -52,7 +53,7 @@ jobs:
       - name: Run tests
         run: pytest
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-24.04' && matrix.python-version == '3.11'
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: false
